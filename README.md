@@ -1,169 +1,169 @@
-<p align="center">
-  <img src="https://cdn.jsdelivr.net/gh/CyberTycoon/vibe-to-ship@main/assets/vibe-to-ship-logo.svg" width="72" alt="vibe-to-ship logo"/>
-</p>
-
-<p align="center">
-  <a href="https://github.com/CyberTycoon/vibe-to-ship"><img src="https://img.shields.io/badge/Showcase-live-3ee8c5?style=for-the-badge&labelColor=111a28" alt="Showcase"/></a>
-  <a href="https://github.com/CyberTycoon/vibe-to-ship/stargazers"><img src="https://img.shields.io/github/stars/CyberTycoon/vibe-to-ship?style=social" alt="GitHub stars"/></a>
-  <a href="https://www.npmjs.com/package/vibe-to-ship"><img src="https://img.shields.io/npm/v/vibe-to-ship?label=vibe-to-ship" alt="npm version"/></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT"/></a>
-</p>
-
-<p align="center"><strong>Stop prompting. Design the graph. Ship.</strong></p>
-
-<p align="center">
-  <a href="https://github.com/CyberTycoon/vibe-to-ship/blob/main/docs/QUICKSTART.md"><strong>Start in 5 minutes</strong></a> ·
-  <a href="#what-do-you-want-to-do">What do you want to do?</a> ·
-  <a href="https://github.com/CyberTycoon/vibe-to-ship/blob/main/docs/QUICKSTART.md#graph-engineering-in-60-seconds">Graph engineering in 60s</a> ·
-  <a href="#patterns">Patterns</a>
-</p>
-
----
-
 # vibe-to-ship
 
-**Productionized graph engineering for everyday vibe coders.** Drop it into Claude Code or opencode and your agent stops doing one job at a time and starts designing *how* a hundred jobs get done — with fresh-context verifiers that actually check the work.
+> Your agent doesn't need more prompts. It needs a graph.
 
-- **Graph engineering, not loop engineering** — bounded node contracts, the Fake-Edge Test, and the Diamond pattern (Fan-out → Reduce → Verify → Synthesize)
-- **Fresh-context verifiers** — a worker and its verifier never share a context window (no nodding along)
-- **3-attempt cap, no auto-push** — human approves every ship
-- **Works standalone** — no account, no cloud required. Pair with [OpenLotus](https://www.openlotus.io) for shared memory, drift checks, and a live progress map (optional superpower)
+`vibe-to-ship` is a single skill that gives any coding agent — Claude Code, opencode, Codex, Cursor — the discipline to ship like a team. No new chat, no extra dashboard. Just a way to turn a messy repo into a working plan and make it real.
 
-```bash
-npx vibe-to-ship init . --skill claude
-npx vibe-to-ship doctor .
-```
-
-Swap `claude` for `opencode`, `codex`, or `cursor`. Week one is **report-only**.
+Works with or without [OpenLotus](https://www.openlotus.io) — standalone when you want speed, supercharged when you want memory.
 
 ---
 
-## What do you want to do?
+## The problem it solves
 
-| I want to… | Start here |
-|------------|------------|
-| Ship a feature without the agent forgetting context | [Quickstart → Triage](docs/QUICKSTART.md) |
-| Rescue a messy vibe-coded repo | [Rescue flow](docs/QUICKSTART.md#rescue) |
-| Make my agent remember across sessions | [OpenLotus pairing](references/openlotus-engine.md) |
-| Run many agents without overwriting files | [Graph engineering](docs/QUICKSTART.md#graph-engineering-in-60-seconds) |
+Single-agent vibe coding collapses after ten files. It forgets what you asked, claims `All tests pass` without running anything, and stalls.
 
-Full table: [docs/jobs.md](docs/jobs.md)
+Throwing five agents at it is worse. They talk over each other, edit the same `page.tsx` at the same time, and politely agree with each other's mistakes.
 
-## Patterns
+`vibe-to-ship` replaces both with a graph. One node is one agent doing one job, with a clear contract for what goes in and what comes out. If two nodes don't actually need each other's output, they run at the same time. If they do, a fresh pair of eyes checks the work before it ships.
 
-| Pattern | When to use | Week 1 | Cost |
-|---------|-------------|--------|------|
-| **Graph triage** | Daily — reconcile declared vs observed | L1 report | Low |
-| **Diamond** | Any multi-file task | L2 cautious | Medium |
-| **Fresh-context verify** | Before every ship | L1 check | Low |
-| **Worktree isolate** | Parallel file edits | L2 patch-only | Low |
+That is graph engineering. It is the difference between prompting and designing.
 
-Pattern library: [`patterns/`](patterns/) · Registry: [`patterns/registry.yaml`](patterns/registry.yaml)
+---
 
-## Getting started
+## In 30 seconds
 
 ```bash
-# 1. Install the skill
-cp -r vibe-to-ship ~/.claude/skills/   # or .opencode/skills/
+# 1. Drop it in
+cp -r vibe-to-ship ~/.claude/skills/      # or .opencode/skills/
 
-# 2. Check your setup
-npx vibe-to-ship doctor .
-
-# 3. Run triage (report-only, safe)
-# In Claude Code: /vibe-to-ship triage
-# In opencode:  opencode run "Run vibe-to-ship triage"
+# 2. Ask your agent
+"Run vibe-to-ship triage on this repo"
 ```
 
-Or tell your agent: **“Run vibe-to-ship triage on this repo”**
+You get back a short, honest triage — **High / Watch / Noise** — and a plan you can trust. No files changed until you say go.
 
-For day-to-day memory without invoking the skill, add the standing-rules block from [`references/agent-rules-snippet.md`](references/agent-rules-snippet.md) to your `AGENTS.md` or `CLAUDE.md`.
+Prefer pointers?
+
+```
+High   — fix today, blocks the next move
+Watch  — worth tracking, not urgent
+Noise  — looked at, safely ignored
+```
+
+---
+
+## What your agent actually does (5 beats)
+
+**Boot** reads the guardrails (`.env`, secrets, payments are off-limits) and checks the budget.
+**Triage** diffs what you *said* you'd do against what `git` *says* you did — branch, quiet days, dirty files, TODOs.
+**Act** fans out the real work into isolated git worktrees so parallel writers never collide. A pure code reduce dedupes the results.
+**Verify** hands every output to a fresh-context skeptic that asks: is it correct, is it current, did the tests actually pass? Three strikes and it escalates.
+**Learn** records the decision and leaves a one-line debrief. The graph remembers so the next session doesn't start from zero.
+
+Every beat is a graph operation. Every node has a schema. No free-text walls.
+
+---
+
+## The detail that makes it different
+
+**The Fake-Edge Test.** Before the graph runs, it asks for each arrow: does job B *actually read* job A's output? If not, the edge is cut and the two jobs run in parallel. In practice that collapses fifteen minutes of sequential waiting into fifteen seconds — without changing the result. The same test catches the classic multi-agent bug where two sub-agents overwrite `page.tsx` because they share a chat history.
+
+**Fresh-context verifiers.** A worker and its checker never share a context window. An agent cannot nod along to itself in a different font.
+
+**One graph, three tries, then a human.** Bounded, not brittle.
+
+```
+Goal
+└─ Active Nodes
+   ├─ Plans       — what you declared
+   ├─ Decisions   — what you chose (record_decision)
+   ├─ Actions     — what workers produced
+   └─ State       — what reality says (get_reality)
+```
+
+If your project has state, the graph has a branch for it. If you use OpenLotus, that branch is live.
 
 ---
 
 ## Install
 
-**Claude Code:**
+**Claude Code**
+
 ```bash
 cp -r vibe-to-ship ~/.claude/skills/
 ```
 
-**opencode:**
+**opencode**
+
 ```bash
 cp -r vibe-to-ship .opencode/skills/
 ```
 
-**Or via `npx skills`:**
+**Any agent via `npx skills`**
+
 ```bash
 npx skills add https://github.com/CyberTycoon/vibe-to-ship
 ```
 
----
-
-## Usage
-
-In any repo where the skill is installed, tell your agent:
-
-> **“Run vibe-to-ship triage on this repo”**
-
-The skill will:
-
-1. **Boot** — load guardrails, check budgets, connect to memory (if OpenLotus is paired)
-2. **Triage** — reconcile what you said you'd do vs what `git` says you did → `High / Watch / Noise`
-3. **Act** — fan out parallel workers in isolated git worktrees
-4. **Verify** — fresh-context skeptics check correctness, currentness, and compiler/test anchors
-5. **Learn** — record the decision and debrief
-
----
-
-## Optional: Supercharge with OpenLotus
-
-OpenLotus gives the skill a live memory layer:
-
-- **`get_reality`** — senses your repo (branch, dirty files, TODOs)
-- **`get_drift`** / **`sync`** — reconciles declared progress vs observed reality
-- **`get_memory`** / **`record_decision`** — shared context tree your whole team sees
-
-Setup is one command (opens your browser, no flags):
+Then add the standing rules so everyday memory works without invoking the skill:
 
 ```bash
-npx openlotus pair
+cat vibe-to-ship/references/agent-rules-snippet.md >> AGENTS.md
+# or CLAUDE.md — both work
 ```
-
-Or tell your agent **“set up OpenLotus”** — Beat 0 will do the three files (`mcp.json`, `.openlotus/config.json`, `AGENTS.md` stub) for you.
-
-Details: [`references/openlotus-engine.md`](references/openlotus-engine.md)
 
 ---
 
-## How it works
+## With OpenLotus — optional, stronger
 
-```
-Goal
- └─ Active Nodes (bounded contracts: in/out schemas)
-     ├─ 📂 Plans
-     ├─ 📂 Decisions (via record_decision)
-     ├─ 📂 Actions & Changes
-     └─ 📂 State & Context (via get_reality)
+Standalone, the skill is disciplined. With OpenLotus, it is *remembering*.
+
+OpenLotus adds four tools your agent can call and a live progress map you can see:
+
+- `get_reality` — what's actually in the repo right now
+- `get_drift` — where declared progress and observed reality diverge
+- `get_memory` / `record_decision` — the shared tree your whole team sees
+
+```bash
+npx openlotus pair          # opens your browser, pick a project
+# or
+"set up OpenLotus"          # Beat 0 does mcp.json + pairing + rules for you
 ```
 
-Every node is one agent doing one task with a defined input/output. If job B doesn't read job A's data, they run in parallel. That's the Fake-Edge Test — it cuts 15 minutes of sequential waiting into 15 seconds.
+No account required to try the skill. OpenLotus is a superpower, not a dependency.
+
+[`references/openlotus-engine.md`](references/openlotus-engine.md) has the full contract.
 
 ---
 
-## Why graph engineering?
+## When to reach for it
 
-Single-agent vibe coding forgets context after 10 files, claims “tests pass” without running them, and bottlenecks. Uncoordinated multi-agent fleets overwrite each other's files and agree on errors. `vibe-to-ship` replaces both with a designed graph that verifies itself.
+- A feature that touches more than three files
+- A repo that `feels` done but has no proof
+- A week where nothing shipped and you can't name why
+- Any time you want the agent to propose the plan *before* it writes code
+
+If it finds nothing actionable, it stops in under 5k tokens. No burning credits to look busy.
 
 ---
 
-## Examples by tool
+## Why not just more agents?
 
-Claude Code (plugin) · opencode · Codex · Cursor · GitHub Actions → [`examples/`](examples/)
+More agents without a graph makes more problems. Shared chat makes them agree with each other's errors. Shared files make them overwrite each other. Shared context makes verifiers useless. `vibe-to-ship` isolates each writer, dedupes with code, and verifies with fresh eyes. That's why it wins where “spawn five sub-agents” loses.
 
-## Operating & Safety
+---
 
-Failure modes · Anti-patterns · Safety · Stories → [`docs/`](docs/)
+## Safety
+
+- Never edits `.env`, `auth/`, `payments/`, `secrets/`, `credentials/`, `migrations/` without explicit human approval
+- Never pushes or merges without you
+- Every file-writing node runs in its own worktree
+- Every verify is a real compiler or test run, not a claim
+
+---
+
+## Development
+
+```bash
+# run the included example
+./examples/mini-ship.sh
+
+# check the patterns
+ls patterns/
+```
+
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE)
+MIT — see [LICENSE](LICENSE). Contributions via PR. If it helped you ship, a star helps others find it.
