@@ -2,6 +2,8 @@
 
 > Your agent doesn't need more prompts. It needs a graph.
 
+![The Diamond — fan out, reduce, verify, synthesize](assets/diamond-flow.svg)
+
 `vibe-to-ship` is a single skill that gives any coding agent — Claude Code, opencode, Codex, Cursor — the discipline to ship like a team. No new chat, no extra dashboard. Just a way to turn a messy repo into a working plan and make it real.
 
 Works with or without [OpenLotus](https://www.openlotus.io) — standalone when you want speed, supercharged when you want memory.
@@ -57,6 +59,8 @@ Every beat is a graph operation. Every node has a schema. No free-text walls.
 ## The detail that makes it different
 
 **The Fake-Edge Test.** Before the graph runs, it asks for each arrow: does job B *actually read* job A's output? If not, the edge is cut and the two jobs run in parallel. In practice that collapses fifteen minutes of sequential waiting into fifteen seconds — without changing the result. The same test catches the classic multi-agent bug where two sub-agents overwrite `page.tsx` because they share a chat history.
+
+![Fake edges cut — sequential becomes parallel](assets/fake-edge.svg)
 
 **Fresh-context verifiers.** A worker and its checker never share a context window. An agent cannot nod along to itself in a different font.
 
@@ -152,15 +156,18 @@ More agents without a graph makes more problems. Shared chat makes them agree wi
 
 ---
 
-## Development
+## Scripts (no agent required)
+
+The skill ships with POSIX shell helpers — no dependencies beyond `git`:
 
 ```bash
-# run the included example
-./examples/mini-ship.sh
-
-# check the patterns
-ls patterns/
+./scripts/install.sh    # one-time setup: rules block, mcp.json hint, pairing check
+./scripts/doctor.sh     # readiness check — High / Watch / Noise, exit 1 if blocked
+./scripts/triage.sh     # report-only reality check, for CI or humans (try --json)
 ```
+
+`doctor.sh` and `triage.sh` are read-only. `install.sh` only appends the rules
+block if it's missing and never overwrites your `mcp.json`.
 
 ---
 
