@@ -8,6 +8,7 @@
 [![Agent skill](https://img.shields.io/badge/type-agent--skill-8A2BE2?style=flat-square)](SKILL.md)
 [![Works with](https://img.shields.io/badge/works%20with-Claude%20Code%20%C2%B7%20opencode%20%C2%B7%20Codex%20%C2%B7%20Cursor-blue?style=flat-square)](#install)
 [![No account needed](https://img.shields.io/badge/setup-100%25%20local-success?style=flat-square)](#quickstart)
+[![M8ven Score](https://m8ven.ai/badge/mcp/cybertycoon/vibe-to-ship)](https://m8ven.ai/mcp/cybertycoon/vibe-to-ship)
 
 ![The Diamond — fan out, reduce, verify, synthesize](assets/diamond-flow.svg)
 
