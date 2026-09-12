@@ -14,11 +14,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install shellcheck
-        run: sudo apt-get update && sudo apt-get install -y shellcheck
-
       - name: Syntax check (bash -n)
         run: bash -n scripts/*.sh
 
-      - name: Shellcheck
-        run: shellcheck -S warning scripts/*.sh
+      - uses: ludeeus/action-shellcheck@master
+        with:
+          severity: warning
+          scandir: './scripts'
