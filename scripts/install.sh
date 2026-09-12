@@ -4,7 +4,7 @@
 # Usage: ./scripts/install.sh [--claude|--opencode|--cursor]  (default: auto-detect)
 set -eu
 
-SKILL_DIR="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+SKILL_DIR="$(CDPATH="" cd -- "$(dirname -- "$0")/.." && pwd)"
 RULES_SRC="$SKILL_DIR/references/agent-rules-snippet.md"
 MODE="auto"
 for arg in "$@"; do
