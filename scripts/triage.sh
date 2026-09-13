@@ -1,15 +1,22 @@
 #!/bin/sh
 # vibe-to-ship triage — report-only reality check for CI or humans without an agent.
-# Prints High / Watch / Noise to stdout. Changes nothing. Exit 0 always
-# (triage findings are data, not failure).
-# Usage: ./scripts/triage.sh [--json]
+# Prints High / Watch / Noise to stdout. Changes nothing. Exit 0 by default
+# (triage findings are data, not failure) — pass --fail-on-high to exit 1 when
+# any High finding is present, e.g. as a soft CI gate.
+# Usage: ./scripts/triage.sh [--json] [--fail-on-high]
 set -eu
 
 JSON=0
+FAIL_ON_HIGH=0
 for arg in "$@"; do
   case "$arg" in
     --json) JSON=1 ;;
-    -h|--help) echo "Usage: $0 [--json]"; exit 0 ;;
+    --fail-on-high) FAIL_ON_HIGH=1 ;;
+    -h|--help)
+      echo "Usage: $0 [--json] [--fail-on-high]"
+      echo "  --json          machine-readable single-line JSON output"
+      echo "  --fail-on-high  exit 1 when any High finding is present (soft CI gate)"
+      exit 0 ;;
     *) echo "Unknown flag: $arg" >&2; exit 2 ;;
   esac
 done
@@ -58,8 +65,17 @@ fi
 
 if [ "$JSON" -eq 1 ]; then
   esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' '; }
-  printf '{"branch":"%s","quiet_days":"%s","dirty":%s,"todos":%s,"high":"%s","watch":"%s","noise":"%s"}\n' \
-    "$BRANCH" "$QUIET_DAYS" "$DIRTY" "$TODOS" "$(esc "$HIGH")" "$(esc "$WATCH")" "$(esc "$NOISE")"
+  # quiet_days is numeric when known, null when git history is unavailable
+  if [ "$QUIET_DAYS" != "?" ]; then
+    QD_FIELD="\"quiet_days\":$QUIET_DAYS"
+  else
+    QD_FIELD="\"quiet_days\":null"
+  fi
+  printf '{"branch":"%s",%s,"dirty":%s,"todos":%s,"high":"%s","watch":"%s","noise":"%s"}\n' \
+    "$(esc "$BRANCH")" "$QD_FIELD" "$DIRTY" "$TODOS" "$(esc "$HIGH")" "$(esc "$WATCH")" "$(esc "$NOISE")"
+  if [ "$FAIL_ON_HIGH" -eq 1 ] && [ -n "$HIGH" ]; then
+    exit 1
+  fi
   exit 0
 fi
 
@@ -67,4 +83,7 @@ echo "## Triage — $(basename "$(pwd)") @ $BRANCH ($(date +%F))"
 echo "- Reality: quiet ${QUIET_DAYS}d · $DIRTY dirty files · $TODOS TODOs"
 printf '%s' "$HIGH$WATCH$NOISE"
 [ -z "$HIGH$WATCH$NOISE" ] && echo "Noise: nothing observed"
+if [ "$FAIL_ON_HIGH" -eq 1 ] && [ -n "$HIGH" ]; then
+  exit 1
+fi
 exit 0
