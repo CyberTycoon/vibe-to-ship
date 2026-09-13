@@ -165,9 +165,16 @@ Check for setup, in this order:
 4. Prefer the repo's helper when present: `./scripts/install.sh` performs steps
    2–3 idempotently (skips what exists, never duplicates blocks).
 
-**Verify setup worked:** run `./scripts/doctor.sh` (or manually: `node --check` the
-mcp path exists, `JSON.parse` the mcp.json, confirm the rules block string is
-present in `AGENTS.md`). Report `Setup: OK (paired)` or `Setup: local-only`.
+**Verify setup worked:** run `./scripts/loop.sh boot` (wraps `doctor.sh`; or manually:
+`node --check` the mcp path exists, `JSON.parse` the mcp.json, confirm the rules
+block string is present in `AGENTS.md`). Report `Setup: OK (paired)` or
+`Setup: local-only`.
+
+**Exact command sequence for this beat:**
+```sh
+./scripts/install.sh        # idempotent: rules block + mcp.json hints
+./scripts/loop.sh boot      # doctor: exits 1 only on blocking High findings
+```
 
 You can also do these three files by hand — the skill supports both paths.
 Setup is one-time; every future session then boots with memory.
@@ -196,10 +203,12 @@ things impossible and the expensive things visible.
 **When:** before any plan, any code, any commit. **Goal:** a prioritized,
 evidence-backed picture of what is actually true right now.
 
-1. Pull observed reality: MCP `get_reality` (branch, quiet days, dirty files,
-   TODO/FIXME counts, file counts, languages). No MCP? Run the equivalents:
-   `git status --short`, `git log --oneline -5`, `git diff --stat`,
-   `grep -rnE "TODO|FIXME|HACK" --include="*.ts*" . | wc -l`.
+1. Pull observed reality: run `./scripts/loop.sh triage` (wraps `triage.sh`:
+   branch, quiet days, dirty files, TODO/FIXME counts → High/Watch/Noise).
+   Add `--json` when a machine will consume the output; add `--fail-on-high`
+   only in CI gates, never in interactive sessions. No MCP? The script already
+   runs the git equivalents locally: `git status --short`, `git log -1 --format=%ct`,
+   `grep -rEn "TODO|FIXME|HACK"`.
 2. Load declared state: MCP `get_memory` (or `PROGRESS.md` → Goal + Active Nodes).
 3. Diff them. Every mismatch becomes a finding classified:
    - **High** — blocks the goal or contradicts a recorded decision. Act today.
@@ -220,6 +229,15 @@ evidence-backed picture of what is actually true right now.
 - Next: fan out [auth-form-validation] + [ci-red] in parallel (no shared files)
 ```
 
+**Bad output — reject your own draft if it matches any of these:**
+
+```markdown
+- "Repo looks mostly fine, some cleanup needed"   ← no evidence, no counts, no ids
+- "High: tech debt is accumulating"               ← not observable, not actionable
+- "Watch: lots of TODOs"                           ← how many? where? since when?
+- Three High items that are all the same root cause ← merge them; shrink the goal
+```
+
 **Failure modes:**
 - *Everything is High.* → Your goal is too big. Shrink the goal, re-triage.
 - *Everything is Noise.* → Either genuinely clean (say so, stop — do not invent
@@ -232,6 +250,9 @@ evidence-backed picture of what is actually true right now.
 **When:** only after triage produced at least one High or Watch item the user
 approved. **Goal:** execute with parallelism and zero collisions.
 
+0. **Contract first**: print the bounded-task contract before any edit —
+   `./scripts/loop.sh act` renders the template (TASK / SCOPE / DONE / STOP).
+   Fill every field. A blank STOP is a promise to drift.
 1. **Fan Out**: one node per independent work item. Isolate file-writing nodes
    in git worktrees so two writers never touch the same checkout:
    ```bash
@@ -255,7 +276,15 @@ confidence hides.
 
 Spawn each verifier as a **new agent invocation** containing only: (a) the
 output artifact, (b) its node contract, (c) the repo at the relevant commit.
-Never the worker's transcript. The verifier runs exactly 3 checks:
+Never the worker's transcript.
+
+**Always anchor with the script first** — it computes, it doesn't opine:
+```sh
+./scripts/loop.sh verify --scope "src/payments/retry.ts,tests/retry.test.ts"
+# options: --build-cmd "pnpm build"  --test-cmd "pnpm test"  (auto-detects by default)
+```
+Exit 0 = reality matches the plan; exit 1 = a FAIL line exists — read it, fix
+it, re-run. The verifier then runs exactly 3 checks on top:
 
 1. *Correctness*: does the code/finding hold up on its own merits?
 2. *Currentness*: is it based on latest HEAD and current sources?
@@ -317,3 +346,19 @@ OpenLotus provides the tree-like interactive memory UI and real-time state via M
 **Persistence without per-prompt repetition:** after that one-time setup, no skill invocation is needed for everyday memory keeping — the rules handle `get_memory`/`record_decision` automatically. Invoke this skill for full triage/plan/verify cycles. Every action is timestamped in the shared map.
 
 **Without OpenLotus:** the entire skill still works. `PROGRESS.md` is the tree, `git` commands are reality, worktrees still isolate, verifiers still verify. You lose shared visibility and drift computation — nothing else.
+
+---
+
+## 6. Script Reference (quick card)
+
+| Command | Beat | Exit 1 when |
+|---|---|---|
+| `./scripts/loop.sh boot` | 1 | doctor finds a blocking High |
+| `./scripts/loop.sh triage [--json] [--fail-on-high]` | 2 | only with `--fail-on-high` and a High exists |
+| `./scripts/loop.sh act` | 3 | never (prints the contract template) |
+| `./scripts/loop.sh verify [--scope a,b] [--build-cmd] [--test-cmd]` | 4 | build/test fail, scope violated |
+| `./scripts/loop.sh learn` | 5 | never (appends session summary to MEMORY.md) |
+
+All scripts are POSIX `sh`, `set -eu`, read-only except `learn` (appends) and
+`install` (appends once). Tapes and frame sources for the README demos live in
+`docs/tapes/`.
