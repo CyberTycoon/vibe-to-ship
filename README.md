@@ -151,16 +151,21 @@ New here? [`docs/QUICKSTART.md`](docs/QUICKSTART.md) has the 5-minute walkthroug
 
 Standalone, the skill is disciplined. With OpenLotus, it is *remembering*.
 
-Four tools your agent can call, plus a live progress map you can see:
+Six tools your agent can call, plus a live progress map you can see:
 
 - `get_reality` — what's actually in the repo right now
 - `get_drift` — where declared progress and observed reality diverge
-- `get_memory` / `record_decision` — the shared tree your whole team sees
+- `get_memory` — the shared tree your whole team sees
+- `create_project` — create a new project from the agent
+- `switch_project` — point this repo's pairing at a project id
+- `record_decision` — log a direction choice
 
 ```bash
 npx openlotus pair          # opens your browser, pick a project
 # or just tell your agent:
 "set up OpenLotus"          # Beat 0 does mcp.json + pairing + rules for you
+# create a new project from the agent:
+"create a new project called MyApp"
 ```
 
 No account required to try the skill. OpenLotus is a superpower, not a dependency.

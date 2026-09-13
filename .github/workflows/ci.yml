@@ -8,16 +8,18 @@ on:
 
 jobs:
   scripts:
-    name: Shellcheck + Syntax
+    name: shell syntax check
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Syntax check (bash -n)
-        run: bash -n scripts/*.sh
+      - name: bash syntax check
+        run: |
+          for f in scripts/*.sh; do
+            bash -n "$f" && echo "OK $f"
+          done
 
-      - uses: ludeeus/action-shellcheck@master
+      - name: shellcheck
+        uses: ludeeus/action-shellcheck@master
         with:
-          severity: warning
-          scandir: './scripts'
+          scandir: ./scripts

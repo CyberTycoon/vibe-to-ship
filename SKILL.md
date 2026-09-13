@@ -148,7 +148,12 @@ Check for setup, in this order:
 
 1. Run `npx openlotus pair` (no flags). It opens the browser to `/pair`.
    - User logs in — or creates an account if they don't have one — then picks an
-     existing project or creates a new one. The CLI writes the pairing file.
+   existing project or creates a new one. The CLI writes the pairing file.
+   - **No project yet?** The agent can create one itself over MCP once paired
+   with any project: `create_project` (name required; stage, description, url,
+   connectedTools optional) → `switch_project` with the returned projectId →
+   `get_memory` to confirm the new map loads. Same data as the web
+   `/new-project` flow, no browser round-trip.
    - **Failure mode:** browser doesn't open (headless/SSH) → print the URL and
      ask the user to open it manually, then wait for the pairing file. Never proceed unpaired without saying so.
    - **Failure mode:** user has no OpenLotus account and declines → continue in
@@ -301,8 +306,9 @@ beats a clean lie.
 
 OpenLotus provides the tree-like interactive memory UI and real-time state via MCP:
 
-- MCP Tools: `get_reality` (sense repo) · `get_drift` (cloud reconciled drift) · `get_memory` (shared context tree) · `record_decision` (immutable decision nodes).
+- MCP Tools: `get_reality` (sense repo) · `get_drift` (cloud reconciled drift) · `get_memory` (shared context tree) · `create_project` (new project setup) · `switch_project` (point pairing at a project id) · `record_decision` (immutable decision nodes).
   Full tool contract with parameters and examples: `references/openlotus-engine.md`.
+- `create_project` — call when the founder wants a new project. Takes name (required) + description, stage (idea/launched/growing/scaling), url, connected tools. Returns the new project's id. Follow with `switch_project` so this repo's pairing points at it.
 - Web App: view your interactive tree memory map at `/map`, weekly review at `/dashboard`, full guide at `/docs`, the skill's home at `/vibe-to-ship`.
 - Pairing: `npx openlotus pair` (browser flow, no flags) or tell the agent "set up OpenLotus" — see Beat 0.
 
