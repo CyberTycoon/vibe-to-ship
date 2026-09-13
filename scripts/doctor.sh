@@ -6,11 +6,12 @@ set -eu
 
 HIGH=0
 WATCH=0
+NOISE=0
 
 say() { printf '%s\n' "$1"; }
 high() { HIGH=$((HIGH + 1)); say "High: $1"; }
 watch() { WATCH=$((WATCH + 1)); say "Watch: $1"; }
-noise() { say "Noise: $1"; }
+noise() { NOISE=$((NOISE + 1)); say "Noise: $1"; }
 
 # --- git present and repo? ---
 if ! command -v git >/dev/null 2>&1; then
@@ -72,10 +73,13 @@ fi
 
 # --- summary ---
 say "---"
-say "doctor: $HIGH high, $WATCH watch"
+say "doctor: $HIGH high, $WATCH watch, $NOISE noise"
 if [ "$HIGH" -gt 0 ]; then
   say "Result: BLOCKED — fix High items, then re-run."
   exit 1
+fi
+if [ "$WATCH" -eq 0 ]; then
+  noise "working tree fully clean — nothing to reconcile, stopping here (not inventing work)"
 fi
 say "Result: READY (warnings above are non-blocking)"
 exit 0
