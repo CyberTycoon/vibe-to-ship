@@ -199,13 +199,15 @@ POSIX shell helpers — no dependencies beyond `git`:
 ```
 vibe-to-ship/
 ├─ SKILL.md                            # the full operator guide — 6 beats, contracts, worked examples
+├─ RELEASE_NOTES.md                    # v1.0.0 title, body, tags (copy to the GitHub Release page)
 ├─ references/
 │  ├─ agent-rules-snippet.md           # standing rules for AGENTS.md / CLAUDE.md
 │  └─ openlotus-engine.md              # the OpenLotus MCP contract
 ├─ scripts/
-│  ├─ install.sh · doctor.sh · triage.sh
+│  ├─ install.sh · doctor.sh · triage.sh   # POSIX helpers, no deps beyond git
 ├─ assets/                             # animated diagrams (this page)
 ├─ docs/QUICKSTART.md                  # 5-minute walkthrough
+├─ .github/workflows/ci.yml            # bash -n + shellcheck on scripts/
 └─ LICENSE
 ```
 
