@@ -80,7 +80,11 @@ if [ "$JSON" -eq 1 ]; then
 fi
 
 echo "## Triage — $(basename "$(pwd)") @ $BRANCH ($(date +%F))"
-echo "- Reality: quiet ${QUIET_DAYS}d · $DIRTY dirty files · $TODOS TODOs"
+if [ "$QUIET_DAYS" = "?" ]; then
+  echo "- Reality: no commits yet · $DIRTY dirty files · $TODOS TODOs"
+else
+  echo "- Reality: quiet ${QUIET_DAYS}d · $DIRTY dirty files · $TODOS TODOs"
+fi
 printf '%s' "$HIGH$WATCH$NOISE"
 [ -z "$HIGH$WATCH$NOISE" ] && echo "Noise: nothing observed"
 if [ "$FAIL_ON_HIGH" -eq 1 ] && [ -n "$HIGH" ]; then

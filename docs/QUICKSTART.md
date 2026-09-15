@@ -4,15 +4,19 @@
 
 ## 1. Install the skill (60s)
 
+The repo **is** the skill — clone it straight into your agent's skills directory.
+
 **Claude Code:**
 ```bash
-cp -r vibe-to-ship ~/.claude/skills/
+git clone https://github.com/CyberTycoon/vibe-to-ship.git ~/.claude/skills/vibe-to-ship
 ```
 
 **opencode:**
 ```bash
-cp -r vibe-to-ship .opencode/skills/
+git clone https://github.com/CyberTycoon/vibe-to-ship.git .opencode/skills/vibe-to-ship
 ```
+
+Updates are one command: `git -C ~/.claude/skills/vibe-to-ship pull`.
 
 ## 2. Run triage (report-only, safe)
 

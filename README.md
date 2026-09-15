@@ -11,8 +11,18 @@ AI coding agents are relentless builders and unreliable narrators. They declare 
 vibe-to-ship is a drop-in skill that closes that gap. It installs a 5-beat operating loop — **boot, triage, act, verify, learn** — into Claude Code, OpenCode, Cursor, or any MCP-capable agent, backed by three shell scripts that check reality instead of trusting narration:
 
 ```bash
-git clone https://github.com/CyberTycoon/vibe-to-ship.git
-cd vibe-to-ship && ./scripts/install.sh && ./scripts/doctor.sh
+# Claude Code
+git clone https://github.com/CyberTycoon/vibe-to-ship.git ~/.claude/skills/vibe-to-ship
+
+# opencode
+git clone https://github.com/CyberTycoon/vibe-to-ship.git .opencode/skills/vibe-to-ship
+```
+
+The repo **is** the skill (`SKILL.md` at the root) — cloning it into your agent's skills directory is the whole install. Updates are one command: `git -C ~/.claude/skills/vibe-to-ship pull`. Then, from inside **your project**, run:
+
+```bash
+bash ~/.claude/skills/vibe-to-ship/scripts/install.sh   # writes the rules block to YOUR project (idempotent)
+bash ~/.claude/skills/vibe-to-ship/scripts/loop.sh boot # readiness check
 ```
 
 <p align="center">
@@ -41,11 +51,15 @@ No account. No API key. No cloud. The skill runs entirely in your repository —
 
 | Beat | Command | What it does | Fails when |
 |---|---|---|---|
-| **Boot** | `./scripts/loop.sh boot` | Environment readiness: git, node, MCP config, pairing, standing rules | a High finding blocks the run |
-| **Triage** | `./scripts/loop.sh triage` | Reality check before planning; plan-vs-repo reconciliation | never (findings are data) — add `--fail-on-high` for a CI gate |
-| **Act** | `./scripts/loop.sh act` | Prints the bounded-task contract: TASK / SCOPE / DONE / STOP | n/a — it is the handoff to real work |
-| **Verify** | `./scripts/loop.sh verify --scope src/x.ts` | Build, tests, scope violations, new drift markers | build or tests fail, or the diff escapes scope |
-| **Learn** | `./scripts/loop.sh learn` | Session summary appended to MEMORY.md | never |
+Run every beat from inside **your project**, invoking the script by its installed path (shown here as `VTS=$HOME/.claude/skills/vibe-to-ship`):
+
+| Beat | Command | What it checks | Fails when |
+|---|---|---|---|
+| **Boot** | `bash "$VTS/scripts/loop.sh" boot` | Environment readiness: git, node, MCP config, pairing, standing rules | a High finding blocks the run |
+| **Triage** | `bash "$VTS/scripts/loop.sh" triage` | Reality check before planning; plan-vs-repo reconciliation | never (findings are data) — add `--fail-on-high` for a CI gate |
+| **Act** | `bash "$VTS/scripts/loop.sh" act` | Prints the bounded-task contract: TASK / SCOPE / DONE / STOP | n/a — it is the handoff to real work |
+| **Verify** | `bash "$VTS/scripts/loop.sh" verify --scope src/x.ts` | Build, tests, scope violations, new drift markers | build or tests fail, or the diff escapes scope |
+| **Learn** | `bash "$VTS/scripts/loop.sh" learn` | Session summary appended to MEMORY.md | never |
 
 The loop is deliberately boring. Boring loops survive contact with real projects.
 

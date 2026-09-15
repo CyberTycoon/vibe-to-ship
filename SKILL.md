@@ -162,22 +162,34 @@ Check for setup, in this order:
    the file exists first with `ls`; a dangling path is worse than no file).
 3. Append the standing-rules block to `AGENTS.md` (create the file if missing);
    for Claude Code repos also ensure `CLAUDE.md` contains the `@AGENTS.md` stub.
-4. Prefer the repo's helper when present: `./scripts/install.sh` performs steps
-   2–3 idempotently (skips what exists, never duplicates blocks).
+4. Prefer the skill's helper: run `install.sh` from the installed skill
+   directory — it writes to your CURRENT directory (the user's project),
+   never into the skill itself:
+   `bash ~/.claude/skills/vibe-to-ship/scripts/install.sh`
+   (or `.opencode/skills/vibe-to-ship/scripts/install.sh`). It is
+   idempotent: skips what exists, never duplicates blocks.
 
-**Verify setup worked:** run `./scripts/loop.sh boot` (wraps `doctor.sh`; or manually:
-`node --check` the mcp path exists, `JSON.parse` the mcp.json, confirm the rules
-block string is present in `AGENTS.md`). Report `Setup: OK (paired)` or
-`Setup: local-only`.
+**Verify setup worked:** run the boot doctor from the skill path, again with
+the project as your working directory:
+`bash ~/.claude/skills/vibe-to-ship/scripts/loop.sh boot` (wraps `doctor.sh`;
+or manually: `node --check` the mcp path exists, `JSON.parse` the mcp.json,
+confirm the rules block string is present in `AGENTS.md`). Report
+`Setup: OK (paired)` or `Setup: local-only`.
 
-**Exact command sequence for this beat:**
+**Exact command sequence for this beat (run from the project root):**
 ```sh
-./scripts/install.sh        # idempotent: rules block + mcp.json hints
-./scripts/loop.sh boot      # doctor: exits 1 only on blocking High findings
+bash ~/.claude/skills/vibe-to-ship/scripts/install.sh   # rules block + mcp.json hints
+bash ~/.claude/skills/vibe-to-ship/scripts/loop.sh boot # doctor: exit 1 only on blocking High
 ```
 
 You can also do these three files by hand — the skill supports both paths.
 Setup is one-time; every future session then boots with memory.
+
+**Path convention for the rest of this document:** `VTS` is the installed skill
+root — `$HOME/.claude/skills/vibe-to-ship` for Claude Code,
+`.opencode/skills/vibe-to-ship` for opencode. Every script is invoked by absolute
+path (`bash "$VTS/scripts/loop.sh" ...`) with your **project** as the working
+directory — the scripts read/write the project they run in, never the skill.
 
 ### Beat 1: Boot (Guardrails & MCP Connect)
 
@@ -203,7 +215,7 @@ things impossible and the expensive things visible.
 **When:** before any plan, any code, any commit. **Goal:** a prioritized,
 evidence-backed picture of what is actually true right now.
 
-1. Pull observed reality: run `./scripts/loop.sh triage` (wraps `triage.sh`:
+1. Pull observed reality: run `bash "$VTS/scripts/loop.sh" triage` (wraps `triage.sh`:
    branch, quiet days, dirty files, TODO/FIXME counts → High/Watch/Noise).
    Add `--json` when a machine will consume the output; add `--fail-on-high`
    only in CI gates, never in interactive sessions. No MCP? The script already
@@ -251,7 +263,7 @@ evidence-backed picture of what is actually true right now.
 approved. **Goal:** execute with parallelism and zero collisions.
 
 0. **Contract first**: print the bounded-task contract before any edit —
-   `./scripts/loop.sh act` renders the template (TASK / SCOPE / DONE / STOP).
+   `bash "$VTS/scripts/loop.sh" act` renders the template (TASK / SCOPE / DONE / STOP).
    Fill every field. A blank STOP is a promise to drift.
 1. **Fan Out**: one node per independent work item. Isolate file-writing nodes
    in git worktrees so two writers never touch the same checkout:
@@ -280,7 +292,7 @@ Never the worker's transcript.
 
 **Always anchor with the script first** — it computes, it doesn't opine:
 ```sh
-./scripts/loop.sh verify --scope "src/payments/retry.ts,tests/retry.test.ts"
+bash "$VTS/scripts/loop.sh" verify --scope "src/payments/retry.ts,tests/retry.test.ts"
 # options: --build-cmd "pnpm build"  --test-cmd "pnpm test"  (auto-detects by default)
 ```
 Exit 0 = reality matches the plan; exit 1 = a FAIL line exists — read it, fix
@@ -341,7 +353,7 @@ OpenLotus provides the tree-like interactive memory UI and real-time state via M
 - Web App: view your interactive tree memory map at `/map`, weekly review at `/dashboard`, full guide at `/docs`, the skill's home at `/vibe-to-ship`.
 - Pairing: `npx openlotus pair` (browser flow, no flags) or tell the agent "set up OpenLotus" — see Beat 0.
 
-**Setup — two paths, same result:** *Agent does it* — tell your agent "set up OpenLotus" and Beat 0 does the three files for you; *Manual* — copy the `mcp.json` snippet and the rules block from `references/agent-rules-snippet.md` by hand, or run `./scripts/install.sh`. All paths are one-time; every future session then boots with memory. The landing and docs call this out as "manual or let your agent do it with vibe-to-ship."
+**Setup — two paths, same result:** *Agent does it* — tell your agent "set up OpenLotus" and Beat 0 does the three files for you; *Manual* — copy the `mcp.json` snippet and the rules block from `references/agent-rules-snippet.md` by hand, or run `bash "$VTS/scripts/install.sh"` from your project root. All paths are one-time; every future session then boots with memory. The landing and docs call this out as "manual or let your agent do it with vibe-to-ship."
 
 **Persistence without per-prompt repetition:** after that one-time setup, no skill invocation is needed for everyday memory keeping — the rules handle `get_memory`/`record_decision` automatically. Invoke this skill for full triage/plan/verify cycles. Every action is timestamped in the shared map.
 
@@ -353,11 +365,11 @@ OpenLotus provides the tree-like interactive memory UI and real-time state via M
 
 | Command | Beat | Exit 1 when |
 |---|---|---|
-| `./scripts/loop.sh boot` | 1 | doctor finds a blocking High |
-| `./scripts/loop.sh triage [--json] [--fail-on-high]` | 2 | only with `--fail-on-high` and a High exists |
-| `./scripts/loop.sh act` | 3 | never (prints the contract template) |
-| `./scripts/loop.sh verify [--scope a,b] [--build-cmd] [--test-cmd]` | 4 | build/test fail, scope violated |
-| `./scripts/loop.sh learn` | 5 | never (appends session summary to MEMORY.md) |
+| `bash "$VTS/scripts/loop.sh" boot` | 1 | doctor finds a blocking High |
+| `bash "$VTS/scripts/loop.sh" triage [--json] [--fail-on-high]` | 2 | only with `--fail-on-high` and a High exists |
+| `bash "$VTS/scripts/loop.sh" act` | 3 | never (prints the contract template) |
+| `bash "$VTS/scripts/loop.sh" verify [--scope a,b] [--build-cmd] [--test-cmd]` | 4 | build/test fail, scope violated |
+| `bash "$VTS/scripts/loop.sh" learn` | 5 | never (appends session summary to MEMORY.md) |
 
 All scripts are POSIX `sh`, `set -eu`, read-only except `learn` (appends) and
 `install` (appends once). Tapes and frame sources for the README demos live in
